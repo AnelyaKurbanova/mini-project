@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ profile_user.username }}'s Profile</title>
+</head>
+<body>
+    <h1>{{ profile_user.username }}'s Profile</h1>
+    <p>{{ profile_user.profile.bio }}</p>
+
+    {% if profile_user.profile.profile_picture %}
+        <img src="{{ profile_user.profile.profile_picture.url }}" alt="Profile Picture" width="150">
+    {% endif %}
+
+    {% if user == profile_user %}
+        <a href="{% url 'edit_profile' %}">Edit Profile</a>
+    {% else %}
+        {% if user.is_authenticated %}
+            {% if is_following %}
+                <form method="POST" action="{% url 'unfollow_user' profile_user.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Unfollow</button>
+                </form>
+            {% else %}
+                <form method="POST" action="{% url 'follow_user' profile_user.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Follow</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+</body>
+</html>

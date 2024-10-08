@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ post.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            font-size: 30px;
+        }
+        p {
+            color: #555;
+            line-height: 1.6;
+        }
+        .meta {
+            color: #999;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        form {
+            display: inline;
+        }
+        .delete-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ post.title }}</h1>
+        <p>{{ post.content }}</p>
+        <p class="meta">By {{ post.author.username }} on {{ post.created_at|date:"F j, Y" }}</p>
+
+        {% if user == post.author %}
+        <form method="POST" action="{% url 'post_delete' post.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="delete-button">Delete</button>
+        </form>
+        {% endif %}
+
+        <h2>Comments:</h2>
+        <ul>
+            {% for comment in comments %}
+                <li>
+                    <p>{{ comment.content }}</p>
+                    <p class="meta-comment">- {{ comment.author.username }} on {{ comment.created_at|date:"F j, Y H:i" }}</p>
+                </li>
+            {% empty %}
+                <li>No comments yet.</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Add a comment:</h3>
+        <form method="POST" action="{% url 'add_comment' post.pk %}">
+            {% csrf_token %}
+            <textarea name="content" rows="4" cols="50" placeholder="Write your comment here..."></textarea>
+            <button type="submit">Add Comment</button>
+        </form>
+    </div>
+</body>
+</html>

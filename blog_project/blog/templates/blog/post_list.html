@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Posts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background-color: #fff;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        li a {
+            text-decoration: none;
+            color: #3498db;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        li a:hover {
+            color: #2980b9;
+        }
+        li p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            color: #777;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .no-posts {
+            text-align: center;
+            color: #888;
+            font-size: 18px;
+        }
+        form {
+            display: inline;
+        }
+        .delete-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pagination span, .pagination a {
+            margin: 0 5px;
+            padding: 8px 16px;
+            border-radius: 4px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+        }
+        .pagination .current {
+            background-color: #2980b9;
+        }
+        .pagination a:hover {
+            background-color: #2980b9;
+        }
+        .meta {
+            color: #555;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+    {% if user.is_authenticated %}
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+    {% else %}
+        <p><a href="{% url 'login' %}">Login</a> or <a href="{% url 'register' %}">Register</a></p>
+    {% endif %}
+
+        <h1>All Blog Posts</h1>
+
+        <form method="GET" action="{% url 'post_list' %}">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search posts...">
+            <input type="submit" value="Search">
+        </form>
+
+        <ul>
+            {% for post in page_obj %}
+                <li>
+                    <div>
+                        <a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a>
+                        <p class="meta">By {{ post.author.username }} | {{ post.created_at|date:"F j, Y, g:i a" }}</p>
+                        <p>{{ post.content|truncatewords:30 }}</p>
+                    </div>
+                    <div>
+                        <form method="POST" action="{% url 'post_delete' post.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-button">Delete</button>
+                        </form>
+                    </div>
+                </li>
+            {% empty %}
+                <li class="no-posts">No posts available.</li>
+            {% endfor %}
+        </ul>
+
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?{% if query %}q={{ query }}&{% endif %}page=1">&laquo; First</a>
+                <a href="?{% if query %}q={{ query }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            <span class="current">{{ page_obj.number }}</span> of <span>{{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?{% if query %}q={{ query }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+                <a href="?{% if query %}q={{ query }}&{% endif %}page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
